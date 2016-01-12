@@ -1,0 +1,29 @@
+{
+  "name": "humweb/slackpipe",
+  "authors": [
+    {
+      "name": "Ryan Shofner",
+      "email": "ryan@letsgolearn.com"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/humweb/php-jira-rest-client"
+    }
+  ],
+  "require": {
+    "symfony/console": "^3.0",
+    "cleentfaar/slack": "^0.17.1",
+    "lesstif/php-jira-rest-client": "~1.6.3",
+    "phpseclib/phpseclib": "^2.0"
+  },
+  "require-dev": {
+    "phpspec/phpspec": "~2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Humweb\\SlackPipe\\": "src/"
+    }
+  }
+}

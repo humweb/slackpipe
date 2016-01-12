@@ -1,0 +1,27 @@
+{
+  "alias": "slackpipe.phar",
+  "chmod": "0755",
+  "compactors": [
+    "Herrera\\Box\\Compactor\\Json",
+    "Herrera\\Box\\Compactor\\Php"
+  ],
+  "directories": ["src/"],
+  "finder": [
+    {
+      "exclude": [
+        "File",
+        "mikey179",
+        "Net",
+        "phpunit",
+        "phpunit-test-case",
+        "Tester",
+        "Tests",
+        "tests",
+        "phpspec"
+      ],
+      "in": "vendor"
+    }
+  ],
+  "main": "run.php",
+  "stub": true
+}

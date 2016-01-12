@@ -1,0 +1,4 @@
+suites:
+    slackpipe_suite:
+        namespace: Humweb\SlackPipe
+        psr4_prefix: Humweb\SlackPipe

@@ -117,7 +117,7 @@ class Provider extends AbstractProvider
         $filename = ! empty($filename) ? '-'.$filename : '';
         $type     = ! empty($type) ? '.'.$type : '';
 
-        $fn = md5(Utils::rand(3).time()).$filename.$type;
+        $fn = sys_get_temp_dir().DIRECTORY_SEPARATOR.md5(Utils::rand(3).time()).$filename.$type;
 
         $handle = fopen($fn, "w");
         fwrite($handle, $data);

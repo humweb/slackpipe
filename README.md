@@ -73,3 +73,13 @@ Pipe `ls` output to file. (specify file type with option: `-t`)
 ```bash
 ls | ./slackpipe jira:upload -t sh SLAC-1
 ```
+
+## Build
+
+* Install box https://github.com/box-project/box2
+* Then run `box build`
+
+In my situation I used:
+```
+ php -d phar.readonly=off box.phar build
+```

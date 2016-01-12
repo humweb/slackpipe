@@ -1,6 +1,5 @@
 {
-  "alias": "slackpipe.phar",
-  "chmod": "0755",
+  "output": "slackpipe.phar",
   "compactors": [
     "Herrera\\Box\\Compactor\\Json",
     "Herrera\\Box\\Compactor\\Php"

@@ -2,7 +2,8 @@
 
 namespace Humweb\SlackPipe\Providers\Jira;
 
-use Humweb\SlackPipe\Support\Crypt;
+use Humweb\SlackPipe\Support\Config;
+use Humweb\SlackPipe\Support\Encryption;
 use JiraRestApi\Configuration\ArrayConfiguration;
 
 /**
@@ -10,51 +11,39 @@ use JiraRestApi\Configuration\ArrayConfiguration;
  *
  * @package Humweb\SlackPipe\Providers\Jira
  */
-class JiraConfig
+class JiraConfig extends Config
 {
 
-    protected $filename;
+    protected $mutators = [];
 
     /**
      * JiraConfig constructor.
      *
-     * @param $filename
+     * @param string $filename
      */
     public function __construct($filename)
     {
-        $this->filename = $filename;
+        parent::__construct($filename);
+
+        $crypt = new Encryption('4bcd3fgh1j|<1mn0pq?st\/wxyz.!:>-');
+
+        $this->addMutators('jiraPassword', function ($val) use ($crypt) {
+            return $crypt->encrypt($val);
+        });
+
+        $this->addAccessor('jiraPassword', function ($val) use ($crypt) {
+            return $crypt->decrypt($val);
+        });
     }
 
-    public function createConfigObject()
-    {
-        $crypt                = new Crypt;
-        $data                 = include($this->path().$this->filename);
-        $data['jiraPassword'] = $crypt->decrypt($data['jiraPassword']);
-
-        return new ArrayConfiguration($data);
-    }
-
-    public function path()
-    {
-        return $_SERVER['HOME'].DIRECTORY_SEPARATOR.'.slackpipe'.DIRECTORY_SEPARATOR;
-    }
-
-    public function file()
-    {
-        return $this->path().$this->filename;
-    }
-
-    public function exists()
-    {
-        return file_exists($this->path().$this->filename);
-    }
+    protected $provider        = 'jira';
+    protected $protectedFields = ['jiraPassword'];
 
     /**
-     * @return mixed
+     * @return \JiraRestApi\Configuration\ArrayConfiguration
      */
-    public function filename()
+    public function createConfigObject()
     {
-        return $this->filename;
+        return new ArrayConfiguration($this->read());
     }
-
 }

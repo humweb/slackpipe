@@ -13,9 +13,7 @@ class JiraCommentCommand extends JiraBaseCommand
     protected function configure()
     {
         parent::configure();
-        $this->setName('jira:post')
-            ->setDescription('Pipe data to Jira issue comment.')
-            ->addArgument('issue', InputArgument::REQUIRED, 'Issue id.');
+        $this->setName('jira:post')->setDescription('Pipe data to Jira issue comment.')->addArgument('issue', InputArgument::REQUIRED, 'Issue id.');
     }
 
     public function handle(InputInterface $input, OutputInterface $output)

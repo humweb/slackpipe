@@ -3,6 +3,8 @@
 namespace Humweb\SlackPipe;
 
 ;
+use Humweb\SlackPipe\Support\Asserts;
+use Humweb\SlackPipe\Support\Contracts\ConfigInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,18 +34,20 @@ class ConfigRemoveCommand extends Command
 
         $baseDir = $_SERVER['HOME'].DIRECTORY_SEPARATOR.'.slackpipe';
 
+        /** @var ConfigInterface $config */
+        $config = Config::factory($provider);
+
         // Custom Handler
-        if ($this->providerHasCustomSetup($provider)) {
-            $class   = $this->providerNamespace($provider, 'SetupCommand');
-            $command = new $class($this);
+        if ($class = Asserts::hasCustomSetup($provider)) {
+            $command = new $class($this, $config);
 
             if (method_exists($command, 'remove')) {
-                $command->remove($input, $output, $baseDir);
+                $command->remove($input, $output);
             }
         } else {
 
-            $configPath = $_SERVER['HOME'].DIRECTORY_SEPARATOR.'.slackpipe'.DIRECTORY_SEPARATOR.'.'.$provider;
-            if (file_exists($configPath)) {
+            $configPath = $config->filePath();
+            if ($config->exists()) {
                 unlink($configPath);
                 $output->writeln('Config removed: '.$configPath);
             } else {
@@ -51,4 +55,5 @@ class ConfigRemoveCommand extends Command
             }
         }
     }
+
 }

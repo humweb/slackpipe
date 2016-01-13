@@ -2,13 +2,14 @@
 
 namespace Humweb\SlackPipe;
 
+use Humweb\SlackPipe\Support\Config;
+use Humweb\SlackPipe\Support\Contracts\ConfigInterface;
 use Humweb\SlackPipe\Support\Options;
 use Humweb\SlackPipe\Traits\ProgressbarTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 
 /**
  * UploadCommand
@@ -28,12 +29,16 @@ abstract class BaseCommand extends Command
      */
     protected $output;
 
-    /**
-     * @var InputInterface
-     */
+    /** @var InputInterface $input */
     protected $input;
-    protected $response;
+
+    /** @var  Options $options */
     protected $options;
+
+    /** @var ConfigInterface $config */
+    protected $config;
+
+    protected $response;
 
     abstract function handle(InputInterface $input, OutputInterface $output);
 
@@ -53,8 +58,8 @@ abstract class BaseCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->setIO($input, $output);
-
+        $this->setInputOutput($input, $output);
+        $this->config = Config::factory($this->provider);
         $this->boot();
 
         $this->output->writeln(PHP_EOL);
@@ -68,7 +73,6 @@ abstract class BaseCommand extends Command
         $this->advanceProgress();
 
         $this->setProgressMessage('Sending data..');
-
 
         // Call actual command handler
         $this->setResponse($this->handle($input, $output));
@@ -85,45 +89,28 @@ abstract class BaseCommand extends Command
 
     public function ensureTokenIsAvailable()
     {
-        $configPath = $this->getConfigPath();
-        $config     = $this->options->get('config');
-
-        if ($config) {
-            $helper   = $this->getHelper('question');
-            $question = new Question('Please enter your token: ', false);
-            $token    = $helper->ask($this->input, $this->output, $question);
-
-            if ($token && file_put_contents($configPath, $token) !== false) {
-                $this->output->writeln('Token written to file: '.$configPath);
-            } else {
-                $this->output->writeln('Nothing written..');
-            }
-
-            return;
-        }
 
         $token = $this->options->get('key');
 
-        if ($token) {
-            $this->token = $token;
-        } elseif (file_exists($configPath)) {
-            $this->token = trim(file_get_contents($configPath));
-        } elseif (file_exists($configPath.'.php')) {
-//            $this->token = trim(file_get_contents($configPath));
-        } else {
-            throw new \RuntimeException("No API token specified or file found: ".$this->getConfigPath()."\n".
-            "Generate Config with: ./slackpipe config:set ".$this->provider."\n");
+        if ($this->config->exists() && $data = $this->config->read()) {
+            if ($token) {
+                $this->token = $token;
+            } elseif (isset($data['token'])) {
+                $this->token = $data['token'];
+            }
+        }
 
+        // No token
+        if (empty($this->token)) {
+            throw new \RuntimeException("No API token specified or file found: ".$this->config->filePath()."\n"."Generate Config with: ./slackpipe config:set ".$this->provider."\n");
         }
     }
 
-    protected function setIO($input, $output)
+    protected function setInputOutput($input, $output)
     {
         $this->input  = $input;
         $this->output = $output;
     }
-
-
 
     public function setResponse($response)
     {
@@ -144,7 +131,8 @@ abstract class BaseCommand extends Command
         return new $provider($this->token, $this->options);
     }
 
-    protected function boot() {
-        $this->options = new Options($this->input->getOptions());
+    protected function boot()
+    {
+        $this->options = new Options($this->input->getOptions() + $this->input->getArguments());
     }
 }

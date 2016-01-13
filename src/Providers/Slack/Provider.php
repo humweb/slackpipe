@@ -7,8 +7,8 @@ use CL\Slack\Payload\FilesUploadPayload;
 use CL\Slack\Transport\ApiClient;
 use Humweb\SlackPipe\BaseResponse;
 use Humweb\SlackPipe\Providers\AbstractProvider;
-use Humweb\SlackPipe\Support\Utils;
 use Humweb\SlackPipe\Support\Asserts;
+use Humweb\SlackPipe\Support\Utils;
 
 /**
  * SlackProvider

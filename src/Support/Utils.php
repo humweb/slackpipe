@@ -10,22 +10,6 @@ namespace Humweb\SlackPipe\Support;
 class Utils
 {
 
-    /**
-     * @param $channel
-     *
-     * @return string
-     */
-    protected function formatChannel($channel)
-    {
-        if ($channel[0] !== '#') {
-            $channel = '#'.$channel;
-
-            return $channel;
-        }
-
-        return $channel;
-    }
-
     static public function parseFileExtension($filename = null)
     {
         if ( ! is_null($filename) && strpos($filename, '.') !== false) {
@@ -45,5 +29,27 @@ class Utils
         }
 
         return md5(time().$filename);
+    }
+
+    static public function dd()
+    {
+        var_dump(func_get_args());
+        exit(1);
+    }
+
+    /**
+     * @param $channel
+     *
+     * @return string
+     */
+    protected function formatChannel($channel)
+    {
+        if ($channel[0] !== '#') {
+            $channel = '#'.$channel;
+
+            return $channel;
+        }
+
+        return $channel;
     }
 }

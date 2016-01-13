@@ -23,7 +23,7 @@ abstract class AbstractProvider
      */
     public function __construct($token, Options $options)
     {
-        $this->token = $token;
+        $this->token   = $token;
         $this->options = $options;
     }
 
@@ -42,6 +42,8 @@ abstract class AbstractProvider
     {
         $this->token = $token;
     }
+
+    abstract function getResponse($response);
 
     protected function getFileName($file)
     {
@@ -70,6 +72,4 @@ abstract class AbstractProvider
     {
         return file_get_contents($file);
     }
-
-    abstract function getResponse($response);
 }

@@ -36,6 +36,7 @@ trait ProgressbarTrait
     {
         $this->bar->setMessage($msg);
     }
+
     protected function finishProgress()
     {
         $this->bar->finish();

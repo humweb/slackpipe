@@ -25,7 +25,7 @@ class JiraUploadCommand extends JiraBaseCommand
 
     public function handle(InputInterface $input, OutputInterface $output)
     {
-        return $this->providerInstance->upload($input->getArgument('issue'));
+        return $this->providerInstance->upload($this->issueService, $input->getArgument('issue'));
     }
 
 }

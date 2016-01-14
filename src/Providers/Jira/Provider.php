@@ -20,14 +20,27 @@ class Provider extends AbstractProvider
     public $name = 'jira';
     public $issue;
 
-    public function comment($issueKey)
+
+    /**
+     * @param $issueService
+     * @param $issueKey
+     *
+     * @return \Humweb\SlackPipe\BaseResponse
+     */
+    public function comment($issueService, $issueKey)
     {
         $this->issue = $issueKey;
         $content     = $this->readInput();
 
-        return $this->getResponse($this->postPipe($issueKey, $content));
+        return $this->getResponse($this->postPipe($issueService, $issueKey, $content));
     }
 
+
+    /**
+     * @param $response
+     *
+     * @return \Humweb\SlackPipe\BaseResponse
+     */
     public function getResponse($response)
     {
         $internalResponse = new BaseResponse($this->options);
@@ -43,19 +56,21 @@ class Provider extends AbstractProvider
         return $internalResponse;
     }
 
-    public function postPipe($issueKey, $body)
+
+    /**
+     * @param $issueService
+     * @param $issueKey
+     * @param $body
+     *
+     * @return bool|\Exception|\JiraRestApi\JiraException
+     */
+    public function postPipe($issueService, $issueKey, $body)
     {
         try {
             $comment = new Comment();
-
             $comment->setBody($body)->setVisibility('role', 'Users');
-
-            $issueService = new IssueService($this->getConfig());
-            $resp         = $issueService->addComment($issueKey, $comment);
+            $resp = $issueService->addComment($issueKey, $comment);
         } catch (JIRAException $e) {
-            //            var_dump($e, $e instanceof JIRAException);
-            //            exit();
-            //            exit();
             return $e;
         }
         if ( ! empty($resp->errorMessages)) {
@@ -65,42 +80,48 @@ class Provider extends AbstractProvider
         return true;
     }
 
-    public function getConfig()
-    {
-        $config = new JiraConfig('jira');
-        if ( ! $config->exists()) {
-        }
 
-        return $config->createConfigObject();
-    }
-
-    public function upload($issueKey)
+    /**
+     * @param $service
+     * @param $issueKey
+     *
+     * @return \Humweb\SlackPipe\BaseResponse
+     */
+    public function upload($service, $issueKey)
     {
         $this->issue = $issueKey;
         if ($this->options->has('file')) {
             $filename = $this->getFileName($this->options->get('file'));
-            $response = $this->uploadFile($issueKey, $filename);
+            $response = $this->uploadFile($service, $issueKey, $filename);
         } else {
             $filename = $this->options->get('filename');
             $type     = $this->options->get('type');
             $content  = $this->readInput();
             $self     = $this;
-            $response = $this->createTempUploadFile($filename, $content, $type, function ($file) use ($issueKey, $self) {
-                return $self->uploadFile($issueKey, $file);
+
+            // Create temporary file and upload it
+            $response = $this->createTempUploadFile($filename, $content, $type, function ($file) use ($service, $issueKey, $self) {
+                return $self->uploadFile($service, $issueKey, $file);
             });
         }
 
         return $this->getResponse($response);
     }
 
-    public function uploadFile($issueKey, $file)
+
+    /**
+     * @param $issueService
+     * @param $issueKey
+     * @param $file
+     *
+     * @return bool|\Exception|\JiraRestApi\JiraException
+     */
+    public function uploadFile($issueService, $issueKey, $file)
     {
 
         try {
-            $issueService = new IssueService($this->getConfig());
-
             // multiple file upload support.
-            $ret = $issueService->addAttachments($issueKey, [$file]);
+            $resp = $issueService->addAttachments($issueKey, [$file]);
         } catch (JIRAException $e) {
             return $e;
         }
@@ -112,18 +133,34 @@ class Provider extends AbstractProvider
         return true;
     }
 
+
+    /**
+     * @param      $filename
+     * @param      $data
+     * @param null $type
+     * @param      $cb
+     *
+     * @return mixed
+     */
     protected function createTempUploadFile($filename, $data, $type = null, $cb)
     {
         $filename = ! empty($filename) ? '-'.$filename : '';
         $type     = ! empty($type) ? '.'.$type : '';
 
+        // Assemble temporary file path string
         $fn = sys_get_temp_dir().DIRECTORY_SEPARATOR.md5(Utils::rand(3).time()).$filename.$type;
 
+        // Open file
         $handle = fopen($fn, "w");
+
+        // Write file
         fwrite($handle, $data);
         fclose($handle);
+
+        // Pass file to callback
         $response = $cb($fn);
 
+        // Remove file
         unlink($fn);
 
         return $response;

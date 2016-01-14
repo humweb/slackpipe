@@ -18,6 +18,6 @@ class JiraCommentCommand extends JiraBaseCommand
 
     public function handle(InputInterface $input, OutputInterface $output)
     {
-        return $this->providerInstance->comment($input->getArgument('issue'));
+        return $this->providerInstance->comment($this->issueService, $input->getArgument('issue'));
     }
 }

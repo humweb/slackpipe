@@ -59,17 +59,17 @@ abstract class BaseCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->setInputOutput($input, $output);
-        $this->config = Config::factory($this->provider);
+        $this->config = Config::factory($this->provider, true);
         $this->boot();
 
         $this->output->writeln(PHP_EOL);
         $this->startProgress(null);
 
-        $this->ensureTokenIsAvailable();
+        $this->ensureConfigExists();
 
         $this->setProgressMessage('Creating "'.$this->provider.'" provider instance.');
 
-        $this->providerInstance = $this->createProvider();
+        $this->providerInstance = $this->createProvider($this->config, $this->options);
         $this->advanceProgress();
 
         $this->setProgressMessage('Sending data..');
@@ -82,27 +82,10 @@ abstract class BaseCommand extends Command
         $this->finishProgress();
     }
 
-    public function getConfigPath()
+    public function ensureConfigExists()
     {
-        return $_SERVER['HOME'].DIRECTORY_SEPARATOR.'.slackpipe'.DIRECTORY_SEPARATOR.'.'.$this->provider;
-    }
-
-    public function ensureTokenIsAvailable()
-    {
-
-        $token = $this->options->get('key');
-
-        if ($this->config->exists() && $data = $this->config->read()) {
-            if ($token) {
-                $this->token = $token;
-            } elseif (isset($data['token'])) {
-                $this->token = $data['token'];
-            }
-        }
-
-        // No token
-        if (empty($this->token)) {
-            throw new \RuntimeException("No API token specified or file found: ".$this->config->filePath()."\n"."Generate Config with: ./slackpipe config:set ".$this->provider."\n");
+        if ( ! $this->config->exists()) {
+            throw new \RuntimeException("Config file found at: ".$this->config->filePath()."\n"."Generate Config with: ./slackpipe config:set ".$this->provider."\n");
         }
     }
 
@@ -124,11 +107,11 @@ abstract class BaseCommand extends Command
         return $this->response;
     }
 
-    protected function createProvider()
+    protected function createProvider($config, $options)
     {
         $provider = '\\Humweb\\SlackPipe\\Providers\\'.ucfirst($this->provider).'\\Provider';
 
-        return new $provider($this->token, $this->options);
+        return new $provider($config, $options);
     }
 
     protected function boot()

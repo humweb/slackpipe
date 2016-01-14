@@ -3,7 +3,7 @@
 namespace Humweb\SlackPipe\Providers\Jira;
 
 use Humweb\SlackPipe\Support\Config;
-use Humweb\SlackPipe\Support\Encryption;
+use Humweb\SlackPipe\Support\Container;
 use JiraRestApi\Configuration\ArrayConfiguration;
 
 /**
@@ -20,12 +20,12 @@ class JiraConfig extends Config
      * JiraConfig constructor.
      *
      * @param string $filename
+     * @param bool   $eager
      */
-    public function __construct($filename)
+    public function __construct($filename, $eager = false)
     {
-        parent::__construct($filename);
 
-        $crypt = new Encryption('4bcd3fgh1j|<1mn0pq?st\/wxyz.!:>-');
+        $crypt = Container::getInstance()->get('crypt');
 
         $this->addMutators('jiraPassword', function ($val) use ($crypt) {
             return $crypt->encrypt($val);
@@ -34,6 +34,8 @@ class JiraConfig extends Config
         $this->addAccessor('jiraPassword', function ($val) use ($crypt) {
             return $crypt->decrypt($val);
         });
+
+        parent::__construct($filename, $eager);
     }
 
     protected $provider        = 'jira';

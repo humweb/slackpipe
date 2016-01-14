@@ -2,12 +2,11 @@
 
 namespace Humweb\SlackPipe\Providers\Slack;
 
-use Humweb\SlackPipe\BaseCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SlackUploadCommand extends BaseCommand
+class SlackUploadCommand extends SlackBaseCommand
 {
     protected $provider = 'slack';
 
@@ -26,7 +25,7 @@ class SlackUploadCommand extends BaseCommand
 
     public function handle(InputInterface $input, OutputInterface $output)
     {
-        return $this->providerInstance->upload();
+        return $this->providerInstance->upload($this->client);
     }
 
 }

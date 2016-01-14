@@ -2,6 +2,7 @@
 
 namespace Humweb\SlackPipe\Providers;
 
+use Humweb\SlackPipe\Support\Contracts\ConfigInterface;
 use Humweb\SlackPipe\Support\Options;
 
 /**
@@ -12,35 +13,19 @@ use Humweb\SlackPipe\Support\Options;
 abstract class AbstractProvider
 {
 
-    protected $token;
+    protected $config;
     protected $options;
 
     /**
      * SlackProvider constructor.
      *
-     * @param string                            $token
-     * @param \Humweb\SlackPipe\Support\Options $options
+     * @param \Humweb\SlackPipe\Support\Contracts\ConfigInterface $config
+     * @param \Humweb\SlackPipe\Support\Options                   $options
      */
-    public function __construct($token, Options $options)
+    public function __construct(ConfigInterface $config, Options $options)
     {
-        $this->token   = $token;
+        $this->config  = $config;
         $this->options = $options;
-    }
-
-    /**
-     * @return string
-     */
-    public function getToken()
-    {
-        return $this->token;
-    }
-
-    /**
-     * @param string $token
-     */
-    public function setToken($token)
-    {
-        $this->token = $token;
     }
 
     abstract function getResponse($response);

@@ -1,4 +1,5 @@
+bootstrap: src/bootstrap.test.php
 suites:
-    slackpipe_suite:
-        namespace: Humweb\SlackPipe
-        psr4_prefix: Humweb\SlackPipe
+  slackpipe_suite:
+      namespace: Humweb\SlackPipe
+      psr4_prefix: Humweb\SlackPipe

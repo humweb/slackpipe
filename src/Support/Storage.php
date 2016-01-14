@@ -18,7 +18,7 @@ class Storage
      */
     public function __construct($path = null)
     {
-        $this->path = $path ?: $_SERVER['HOME'].DIRECTORY_SEPARATOR.'.slackpipe'.DIRECTORY_SEPARATOR;
+        $this->path = rtrim($path, '\/').DIRECTORY_SEPARATOR ?: $_SERVER['HOME'].DIRECTORY_SEPARATOR.'.slackpipe'.DIRECTORY_SEPARATOR;
     }
 
     public function get($file)
@@ -33,6 +33,6 @@ class Storage
 
     public function put($file, $content = '')
     {
-        return file_put_contents($this->path($file), $content);
+        return file_put_contents($this->path($file), $content, null);
     }
 }

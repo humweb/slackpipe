@@ -5,9 +5,12 @@ namespace Humweb\SlackPipe\Providers\Slack;
 use CL\Slack\Payload\ChatPostMessagePayload;
 use CL\Slack\Payload\FilesUploadPayload;
 use CL\Slack\Transport\ApiClient;
+use CL\Slack\Transport\ApiClientInterface;
 use Humweb\SlackPipe\BaseResponse;
 use Humweb\SlackPipe\Providers\AbstractProvider;
 use Humweb\SlackPipe\Support\Asserts;
+use Humweb\SlackPipe\Support\Contracts\ConfigInterface;
+use Humweb\SlackPipe\Support\Options;
 use Humweb\SlackPipe\Support\Utils;
 
 /**
@@ -17,6 +20,22 @@ use Humweb\SlackPipe\Support\Utils;
  */
 class Provider extends AbstractProvider
 {
+
+    protected $client;
+    protected $payload;
+
+    /**
+     * SlackProvider constructor.
+     *
+     * @param \Humweb\SlackPipe\Support\Contracts\ConfigInterface $config
+     * @param \Humweb\SlackPipe\Support\Options                   $options
+     */
+    public function __construct(ConfigInterface $config, Options $options)
+    {
+        parent::__construct($config, $options);
+
+        $this->token = $this->config->get('token');
+    }
 
     public function post()
     {
@@ -37,9 +56,8 @@ class Provider extends AbstractProvider
         return $this->getResponse($client->send($payload));
     }
 
-    public function upload()
+    public function upload(ApiClientInterface $client)
     {
-        $client  = new ApiClient($this->token);
         $payload = new FilesUploadPayload();
 
         if ($this->options->has('file')) {
@@ -84,6 +102,39 @@ class Provider extends AbstractProvider
         }
 
         return $internalResponse;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    /**
+     * @param mixed $client
+     */
+    public function setClient($client)
+    {
+        $this->client = $client;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPayload()
+    {
+        return $this->payload;
+    }
+
+    /**
+     * @param mixed $payload
+     */
+    public function setPayload($payload)
+    {
+        $this->payload = $payload;
     }
 
 }

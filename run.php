@@ -9,11 +9,13 @@ use Humweb\SlackPipe\Providers\Jira\JiraCommentCommand;
 use Humweb\SlackPipe\Providers\Jira\JiraUploadCommand;
 use Humweb\SlackPipe\Providers\Slack\SlackPostCommand;
 use Humweb\SlackPipe\Providers\Slack\SlackUploadCommand;
-use Symfony\Component\Console\Application;
+use Humweb\SlackPipe\SetupCommand;
 
-$application = new Application();
+//==========[ Bootstrap Application ]
+require 'src/bootstrap.php';
 
 //==========[ Framework Commands ]
+$application->add(new SetupCommand());
 $application->add(new ConfigSetCommand());
 $application->add(new ConfigRemoveCommand());
 

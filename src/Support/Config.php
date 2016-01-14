@@ -14,30 +14,39 @@ class Config implements ConfigInterface
 
     protected $filename;
     protected $storage;
-    protected $crypt;
-    protected $accessors = [];
+    protected $data      = [];
 
-    protected $mutators = [];
+
+    protected $accessors = [];
+    protected $mutators  = [];
 
     /**
      * JiraConfig constructor.
      *
      * @param string $filename
+     * @param bool   $eager
      */
-    public function __construct($filename)
+    public function __construct($filename = null, $eager = false)
     {
-        $this->filename = $filename;
-        $this->crypt    = new Encryption('4bcd3fgh1j|<1mn0pq?st\/wxyz.!:>-');
-        $this->storage  = new Storage;
-    }
-
-    static public function factory($filename)
-    {
-        if ($config = Asserts::hasCustomConfig($filename)) {
-            return new $config($filename);
+        if ( ! is_null($filename)) {
+            $this->filename = $filename;
         }
 
-        return new static($filename);
+        $this->storage  = Container::getInstance()->get('storage');
+
+        // Eager load data
+        if ($eager === true) {
+            $this->read();
+        }
+    }
+
+    static public function factory($filename, $eager = false)
+    {
+        if ($config = Asserts::hasCustomConfig($filename)) {
+            return new $config($filename, $eager);
+        }
+
+        return new static($filename, $eager);
     }
 
     /**
@@ -86,7 +95,8 @@ class Config implements ConfigInterface
      */
     public function write($data = [])
     {
-        $data = $this->dehydrate($data);
+        $this->data = $data;
+        $data       = $this->dehydrate($data);
 
         return $this->storage->put($this->file(), "<?php\nreturn ".var_export($data, true).";");
     }
@@ -126,7 +136,11 @@ class Config implements ConfigInterface
      */
     public function read()
     {
-        return $this->hydrate(include($this->filePath()));
+        if (empty($this->data)) {
+            $this->data = $this->hydrate(include($this->filePath()));
+        }
+
+        return $this->data;
     }
 
     /**
@@ -165,5 +179,34 @@ class Config implements ConfigInterface
     public function exists()
     {
         return file_exists($this->filePath());
+    }
+
+
+    // Data Access
+    public function get($key, $default = null)
+    {
+        return $this->has($key) ? $this->data[$key] : $default;
+    }
+
+    public function has($key = null)
+    {
+        return array_key_exists($key, $this->data) && ! is_null($this->data[$key]);
+    }
+
+    public function set($key, $val = null)
+    {
+        return $this->data[$key] = $val;
+    }
+
+    public function clear()
+    {
+        return $this->data = [];
+    }
+    /**
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
     }
 }

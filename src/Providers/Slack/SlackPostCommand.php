@@ -2,12 +2,11 @@
 
 namespace Humweb\SlackPipe\Providers\Slack;
 
-use Humweb\SlackPipe\BaseCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SlackPostCommand extends BaseCommand
+class SlackPostCommand extends SlackBaseCommand
 {
     protected $provider = 'slack';
 
@@ -22,6 +21,6 @@ class SlackPostCommand extends BaseCommand
 
     public function handle(InputInterface $input, OutputInterface $output)
     {
-        return $this->providerInstance->post();
+        return $this->providerInstance->post($this->client);
     }
 }

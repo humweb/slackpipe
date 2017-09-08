@@ -27,8 +27,4 @@ abstract class SlackBaseCommand extends BaseCommand
         parent::boot();
         $this->client = new ApiClient($this->config->get('token'));
     }
-
-//    protected function configure()
-//    {
-//    }
 }
